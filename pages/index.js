@@ -19,7 +19,7 @@ export async function getStaticProps(){
     // fetch can also works in server side code as well
     let meetups;
     try {
-        const response= await fetch('http://localhost:3000/api/meetups'); 
+        const response= await fetch('/api/meetups'); 
         const meetupsList=await response.json();
          meetups=meetupsList.map(item=>({
          id:item._id.toString(),
