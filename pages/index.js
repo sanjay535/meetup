@@ -1,6 +1,8 @@
 import Head from "next/head";
-import MeetupList from "../components/meetups/MeetupList";
 import { Fragment } from "react";
+import { MongoClient } from "mongodb";
+import MeetupList from "../components/meetups/MeetupList";
+
 
 function HomePage({meetups}){
     return  (
@@ -17,10 +19,16 @@ function HomePage({meetups}){
 export async function getStaticProps(){
     // fetch data from API
     // fetch can also works in server side code as well
+
+
+    const uri ='mongodb+srv://sanjay:gautam535@cluster0.s8i0unm.mongodb.net/meetup?retryWrites=true&w=majority';
+    const client = new MongoClient(uri);
     let meetups;
     try {
-        const response= await fetch('/api/meetups'); 
-        const meetupsList=await response.json();
+      await client.connect();
+      const db = client.db();
+      const meetupCollection = db.collection('meetups');
+      const meetupsList = await meetupCollection.find().toArray();
          meetups=meetupsList.map(item=>({
          id:item._id.toString(),
          title:item.title,
@@ -28,10 +36,13 @@ export async function getStaticProps(){
          address:item.address,
          description:item.description
         }))
-         
     } catch (error) {
-        console.error(error);
+      console.log(`Error=`, error);
     }
+    finally{
+        await client.close();
+    }
+
     return {
         props:{
             meetups:meetups
