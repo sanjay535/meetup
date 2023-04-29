@@ -16,7 +16,8 @@ function NewMeetupPage(){
         );
         const data=await response.json();
         console.log(data); 
-        router.push('/');
+        // router.push('/');
+        router.push('/', undefined, { unstable_skipClientCache: true })
     }
 
     return <NewMeetupForm onAddMeetup={addMeetupHandler}/>
