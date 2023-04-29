@@ -1,3 +1,4 @@
+import { MongoClient, ObjectId } from "mongodb";
 import MeetupDetail from "../../components/meetups/MeetupDetail";
 
 function MeetupDetailsPage(props){
@@ -16,36 +17,40 @@ export async function getStaticPaths(){
      fallback=true  
      then nextJS generate page dynamically for this meetupId
 
-     fallback allow us to pregenrate page for some meetupId that are visiting more frequently
+     fallback :true allow us to pregenrate page for some meetupId that are visiting more frequently
      */
+     const uri ='mongodb+srv://sanjay:gautam535@cluster0.s8i0unm.mongodb.net/meetup?retryWrites=true&w=majority';
+     const client = new MongoClient(uri);
+       await client.connect();
+       const db = client.db();
+       const meetupCollection = db.collection('meetups');
+       const meetups = await meetupCollection.find({}, {_id:1}).toArray(); // it return only Id's of object
+    client.close();
     return {
         fallback:false,
-        paths:[
-            {
-                params:{
-                    meetupId:'m1',
-                }
-            },
-            {
-                params:{
-                    meetupId:'m2',
-                }
-            }
-        ]
+        paths:meetups.map(meetup=>({params:{meetupId:meetup._id.toString()}}))
     }
 }
 
 export async function getStaticProps(context){
     const meetupId=context.params.meetupId;
     console.log(meetupId);
+    const uri ='mongodb+srv://sanjay:gautam535@cluster0.s8i0unm.mongodb.net/meetup?retryWrites=true&w=majority';
+    const client = new MongoClient(uri);
+      await client.connect();
+      const db = client.db();
+      const meetupCollection = db.collection('meetups');
+      const selectedMeetup = await meetupCollection.findOne({_id:new ObjectId(meetupId)});
+      console.log('selectedMeetup = ',selectedMeetup);
+      client.close()
+    debugger
     return {
         props:{
             meetupData:{
-                image:'https://images.unsplash.com/photo-1486663845017-3eedaa78617f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1887&q=80',
-                id:meetupId,
-                title:'First Meetup',
-                address:'Some street 5, Some city',
-                description:'this is a first meetup'
+                image:selectedMeetup.image,
+                title:selectedMeetup.title,
+                address:selectedMeetup.address,
+                description:selectedMeetup.description
             }
         }
     }

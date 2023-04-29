@@ -17,8 +17,44 @@ const DUMMY_DATA=[
 }
 ];
 
-function HomePage(){
-    return  <MeetupList meetups={DUMMY_DATA}/>;
+function HomePage({meetups, loading}){
+    if(loading){
+        return <h>Loading...</h>
+    }
+    return  <MeetupList meetups={meetups}/>;
+}
+
+// this function runs during build
+export async function getStaticProps(){
+    // fetch data from API
+    // fetch can also works in server side code as well
+    let loading;
+    let meetups;
+    try {
+        loading=true;
+        const response= await fetch('http://localhost:3000/api/meetups'); 
+        const meetupsList=await response.json();
+         meetups=meetupsList.map(item=>({
+         id:item._id,
+         title:item.title,
+         image:item.image,
+         address:item.address,
+         description:item.description
+        }))
+         
+    } catch (error) {
+        console.error(error);
+    } finally{
+        loading=false;
+    }
+    return {
+        props:{
+            meetups:meetups,
+            loading:loading
+        },
+        revalidate:1
+    } 
+   
 }
 
 export default HomePage;
