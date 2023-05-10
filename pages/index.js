@@ -39,8 +39,7 @@ export async function getStaticProps() {
     return {
       props: {
         meetups: meetups,
-      },
-      revalidate: 1,
+      }
     };
   } catch (error) {
     console.log(`Error=`, error);
